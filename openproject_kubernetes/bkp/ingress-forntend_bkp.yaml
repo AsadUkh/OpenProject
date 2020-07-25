@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1beta1
+
+kind: Ingress
+
+metadata:
+  name: traefik
+  #  namespace: kube-system
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+
+spec:
+  tls:
+  - hosts:
+    - cloud.openproj.local
+    secretName: testsecret-tls      
+  rules:
+  - host: cloud.openproj.local 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-proxy
+          servicePort: 80
