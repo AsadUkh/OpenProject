@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mongo
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      volumes:
+      - name: mongo-data-pv
+        persistentVolumeClaim:
+          claimName: pvc-mongo-data
+      - name: mongo-dump-pv
+        persistentVolumeClaim:
+          claimName: pvc-mongo-dump
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rocket-chat
+      containers:
+      - args:
+        - mongod
+        - --smallfiles
+        - --oplogSize
+        - "128"
+        - --replSet
+        - rs0
+        - --storageEngine=mmapv1
+        name: mongo
+        image: mongo:4.0
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - mountPath: "/data/db"
+          name: mongo-data-pv
+        - mountPath: "/dump"
+          name: mongo-dump-pv
+
+

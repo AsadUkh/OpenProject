@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: traefik
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - rocket.ivolve.com
+    secretName: rocket-tls
+  rules:
+  - host: rocket.ivolve.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rocketchat
+          servicePort: 30000

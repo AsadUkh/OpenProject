@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rocketchat
+  name: rocketchat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rocketchat
+  template:
+    metadata:
+      labels:
+        app: rocketchat
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+          preference:
+            matchExpressions:
+            - key: disktype
+              operator: In
+              values:
+              - ssd 
+      volumes:
+      - name: rocketchat-pv
+        persistentVolumeClaim:
+          claimName: pvc-rocketchat
+      containers:
+      - args:
+        - bash
+        - -c
+        - for i in `seq 1 30`; do node main.js && s=$? && break || s=$?; echo "Tried
+          $i times. Waiting 5 secs..."; sleep 5; done; (exit $s)
+        name: rocketchat
+        image: rocket.chat:latest
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: "/app/uploads"
+          name: rocketchat-pv 
+        env:
+        - name: Accounts_UseDNSDomainCheck 
+          value: "True"
+        - name: MONGO_OPLOG_URL
+          value: mongodb://mongo:27017/local
+        - name: MONGO_URL
+          value: mongodb://mongo:27017/rocketchat
+        - name: PORT
+          value: "3000"
+        - name: ROOT_URL
+          value: http://rocket.com
+
+

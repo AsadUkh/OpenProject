@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hubot
+  name: hubot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hubot
+  template:
+    metadata:
+      labels:
+        app: hubot
+    spec:
+      volumes:
+      - name: hubot-pv
+        persistentVolumeClaim:
+          claimName: pvc-hubot
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rocket-chat
+      containers:
+      - name: hubot
+        image: rocketchat/hubot-rocketchat:latest
+        volumeMounts:
+        - mountPath: "/home/hubot/scripts"
+          name: hubot-pv 
+
+
