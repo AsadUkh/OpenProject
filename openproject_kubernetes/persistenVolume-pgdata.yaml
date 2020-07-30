@@ -11,14 +11,12 @@ spec:
     storage: 50Gi
   hostPath:
     path: /mnt/db-data-posgres
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 1
-        preference:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - openproject
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - openproject
   persistentVolumeReclaimPolicy: Retain
